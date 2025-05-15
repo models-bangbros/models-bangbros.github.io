@@ -2,48 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Model Audition Form</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
       margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
       background-color: #000;
       color: #ffd700;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      width: 100vw;
     }
 
     .logo {
       width: 100%;
       display: flex;
-      justify-content: flex-start;
-      padding: 20px 30px 10px;
-      margin-left: 50px;
-      margin-top: -100px;
-      margin-bottom: -100px;
+      justify-content: center;
+      padding: 10px;
+      margin-bottom: 10px;
     }
 
     .logo img {
-      width: 240px;
+      width: 180px;
+      max-width: 100%;
+      height: auto;
+      margin-bottom: -100px;
+      margin-top: -200px;
+      
     }
 
     .form-container {
       background: #1a1a1a;
       border: 2px solid #ffd700;
       border-radius: 10px;
-      padding: 30px;
+      padding: 20px;
+      width: 95%;
       max-width: 450px;
-      width: 90%;
       margin: 0 auto;
-      box-sizing: border-box;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+      transform-origin: center;
+    }
+
+    @media (max-width: 480px) {
+      .form-container {
+        transform: scale(0.95);
+        padding: 15px;
+      }
     }
 
     .form-title {
-      font-size: 24px;
+      font-size: 20px;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       font-weight: bold;
     }
 
@@ -73,44 +93,52 @@
 
     input, select {
       width: 100%;
-      padding: 10px;
-      margin: 10px 0 20px;
+      padding: 12px;
+      margin: 8px 0 15px;
       border: 1px solid #ffd700;
       border-radius: 5px;
       background-color: #000;
       color: #ffd700;
-      box-sizing: border-box;
+      font-size: 16px;
     }
 
     label {
       font-weight: bold;
       display: block;
+      font-size: 14px;
     }
 
     .checkbox-group {
       display: flex;
       align-items: center;
-      margin: 8px 0;
+      margin: 10px 0;
+      font-size: 14px;
     }
 
     .checkbox-group input[type="checkbox"] {
       margin-right: 10px;
       width: auto;
+      min-width: 18px;
+      min-height: 18px;
     }
 
     .buttons {
       display: flex;
       justify-content: space-between;
+      margin-top: 20px;
     }
 
     button {
-      padding: 10px 20px;
+      padding: 12px 20px;
       background-color: #ffd700;
       border: none;
       color: #000;
       font-weight: bold;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 16px;
+      flex: 1;
+      margin: 0 5px;
     }
 
     button:hover {
@@ -120,12 +148,37 @@
     small {
       font-size: 12px;
       color: #ccc;
+      display: block;
+      margin-top: -10px;
+      margin-bottom: 15px;
     }
 
     .loading {
       display: none;
       text-align: center;
       margin: 20px 0;
+    }
+
+    /* Disable zooming on mobile */
+    @media (max-width: 768px) {
+      input, select, button, textarea {
+        font-size: 16px !important;
+      }
+      
+      body {
+        touch-action: manipulation;
+      }
+    }
+
+    /* Hide scrollbars */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    
+    /* Prevent scrolling */
+    html, body {
+      overflow: hidden;
+      height: 100%;
     }
   </style>
 </head>
@@ -260,7 +313,7 @@
 
     <!-- Step 8: Signature and Disclosures -->
     <div class="step">
-      <p><strong>Disclosure:</strong> By signing below, you acknowledge and agree to our data use policy, confirm you are of legal working age in your country, and understand this form collects personal information for audition and employment consideration purposes.</p>
+      <p style="font-size: 14px;"><strong>Disclosure:</strong> By signing below, you acknowledge and agree to our data use policy, confirm you are of legal working age in your country, and understand this form collects personal information for audition and employment consideration purposes.</p>
 
       <div class="checkbox-group">
         <input type="checkbox" id="agreePolicy" required>
@@ -292,7 +345,7 @@
   
   <!-- Confirmation Message -->
   <div class="confirmation">
-    <h2>Application Received Successfully!</h2>
+    <h2 style="font-size: 20px;">Application Received Successfully!</h2>
     <p>Thank you for submitting your application. Please check your mailbox for a reply from us.</p>
     <p>We will contact you soon with further instructions.</p>
   </div>
@@ -452,6 +505,9 @@
       const country = document.getElementById("country").value;
       updateSsnFields(country);
     }
+    
+    // Scroll to top of form on step change
+    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function validateStepAndProceed() {
@@ -516,6 +572,13 @@
 
   // Initialize the form
   showStep(currentStep);
+  
+  // Prevent zooming on mobile
+  document.addEventListener('touchmove', function(event) {
+    if (event.scale !== 1) { 
+      event.preventDefault(); 
+    }
+  }, { passive: false });
 </script>
 </body>
 </html>
