@@ -642,6 +642,47 @@ input[type="tel"] {
       event.preventDefault(); 
     }
   }, { passive: false });
+
+  function validateStepAndProceed() {
+  const currentInputs = steps[currentStep].querySelectorAll('input, select');
+  for (let input of currentInputs) {
+    if (input.required && !input.value) {
+      alert("Please complete all required fields.");
+      return;
+    }
+    
+    // Validate email format if it's an email field
+    if (input.type === 'email' && input.value) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(input.value)) {
+        alert("Please enter a valid email address.");
+        return;
+      }
+    }
+    
+    // Validate phone number format
+    if (input.name === 'phone' && input.value) {
+      const phoneRegex = /^[0-9]{10,15}$/;
+      if (!phoneRegex.test(input.value)) {
+        alert("Please enter a valid phone number (10-15 digits, no spaces or special characters).");
+        return;
+      }
+    }
+    
+    // Validate date of birth (minimum age)
+    if (input.name === 'dob' && input.value) {
+      const dob = new Date(input.value);
+      const today = new Date();
+      const minAgeDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+      
+      if (dob > minAgeDate) {
+        alert("You must be at least 18 years old to apply.");
+        return;
+      }
+    }
+  }
+  nextStep();
+}
 </script>
 </body>
 </html>
