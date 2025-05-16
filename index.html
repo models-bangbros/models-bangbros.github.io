@@ -598,8 +598,37 @@
       return;
     }
     
-    // Show throbber
-    throbber.style.display = 'flex';
+    document.getElementById('auditionForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Show throbber/loading spinner
+    document.getElementById('throbber').style.display = 'flex';
+    
+    // Create FormData object
+    const formData = new FormData(this);
+    
+    // Send via AJAX
+    fetch(this.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect on success
+            window.location.href = data.redirect_url;
+        } else {
+            // Show error message
+            alert('Error: ' + data.message);
+            document.getElementById('throbber').style.display = 'none';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+        document.getElementById('throbber').style.display = 'none';
+    });
+});
     
     // Disable submit button to prevent multiple submissions
     submitBtn.disabled = true;
