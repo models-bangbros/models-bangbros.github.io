@@ -303,16 +303,16 @@
       <!-- Passport Upload Section -->
       <div id="passportUploadSection" style="display: none;">
         <label>Upload Passport Page:</label>
-        <input type="file" name="passportUpload" accept="image/*">
+        <input type="file" name="passportUpload" accept="image/jpeg,image/png">
         <small>Ensure all four corners are visible</small>
       </div>
 
       <!-- Driver's License Upload Section -->
       <div id="driversUploadSection" style="display: none;">
         <label>Upload Driver's License Front:</label>
-        <input type="file" name="dlFront" accept="image/*">
+        <input type="file" name="dlFront" accept="image/jpeg,image/png">
         <label>Upload Driver's License Back:</label>
-        <input type="file" name="dlBack" accept="image/*">
+        <input type="file" name="dlBack" accept="image/jpeg,image/png">
         <small>Ensure all four corners are visible</small>
       </div>
 
@@ -325,7 +325,7 @@
     <!-- Step 6: Utility Bill -->
     <div class="step">
       <label>Upload Recent Utility Bill:</label>
-      <input type="file" name="utilityBill" accept="image/*,application/pdf">
+      <input type="file" name="utilityBill" accept="image/jpeg,image/png,application/pdf">
       <small>Ensure all four corners are visible</small>
       <div class="buttons">
         <button type="button" onclick="prevStep()">Previous</button>
@@ -336,7 +336,7 @@
     <!-- Step 7: Selfie -->
     <div class="step">
       <label>Upload a Selfie Photo:</label>
-      <input type="file" name="selfie" accept="image/*" required>
+      <input type="file" name="selfie" accept="image/jpeg,image/png,application/pdf" required>
       <div class="buttons">
         <button type="button" onclick="prevStep()">Previous</button>
         <button type="button" onclick="validateStepAndProceed()">Upload</button>
