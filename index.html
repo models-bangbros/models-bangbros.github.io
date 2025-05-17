@@ -246,7 +246,7 @@ input[type="tel"] {
   <!-- Add Phone Number Field -->
   <label>Phone Number:</label>
   <input type="tel" name="phone" pattern="[0-9]{10,15}" required>
-  <small>Format: 1234567890 (no spaces or special characters)</small>
+  <small>Format: +1234567890 (no spaces or special characters)</small>
 
   <!-- Add Date of Birth Field -->
   <label>Date of Birth:</label>
@@ -476,11 +476,11 @@ input[type="tel"] {
     if (country === "United States") {
       ssnContainer.style.display = "block";
       ssnLabel.textContent = "Social Security Number (SSN):";
-      ssnNote.textContent = "Last 4 digits only";
+      ssnNote.textContent = "Enter your 9 digits SSN only";
     } else if (country === "Canada") {
       ssnContainer.style.display = "block";
       ssnLabel.textContent = "Social Insurance Number (SIN):";
-      ssnNote.textContent = "";
+      ssnNote.textContent = "Enter your 9 digits SIN only";
     } else {
       ssnContainer.style.display = "none";
     }
