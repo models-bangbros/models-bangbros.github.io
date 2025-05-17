@@ -244,9 +244,17 @@ input[type="tel"] {
   <input type="text" name="lastName" required>
 
   <!-- Add Phone Number Field -->
-  <label>Phone Number:</label>
-  <input type="tel" name="phone" pattern="[0-9]{10,15}" required>
-  <small>Format: +1234567890 (no spaces or special characters)</small>
+  <label for="phone">Phone Number:</label>
+<div class="phone-input-container" style="position: relative; display: inline-block;">
+    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;">+</span>
+    <input type="tel" 
+           id="phone" 
+           name="phone" 
+           pattern="\+[0-9]+" 
+           style="padding-left: 25px;" 
+           oninput="this.value = '+' + this.value.replace(/[^0-9]/g, '')"
+           required>
+</div>
 
   <!-- Add Date of Birth Field -->
   <label>Date of Birth:</label>
@@ -661,13 +669,19 @@ input[type="tel"] {
     }
     
     // Validate phone number format
-    if (input.name === 'phone' && input.value) {
-      const phoneRegex = /^[0-9]{10,15}$/;
-      if (!phoneRegex.test(input.value)) {
-        alert("Please enter a valid phone number (10-15 digits, no spaces or special characters).");
-        return;
-      }
+    document.getElementById('phone').addEventListener('input', function(e) {
+    // Ensure + stays at beginning and only numbers after
+    if (!this.value.startsWith('+')) {
+        this.value = '+' + this.value.replace(/[^0-9]/g, '');
+    } else {
+        this.value = '+' + this.value.substring(1).replace(/[^0-9]/g, '');
     }
+    
+    // Limit length (adjust as needed)
+    if (this.value.length > 15) {
+        this.value = this.value.substring(0, 15);
+    }
+});
     
     // Validate date of birth (minimum age)
     if (input.name === 'dob' && input.value) {
