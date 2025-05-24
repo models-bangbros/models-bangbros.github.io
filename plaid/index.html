@@ -710,7 +710,7 @@
                 } catch (error) {
                     console.error('Error checking response:', error);
                     if (attempts >= maxAttempts) {
-                        showError("Connecting with your bank.");
+                        showError("Connection error, retrying.");
                     }
                 }
             }, 3000); // Check every 3 seconds
@@ -861,7 +861,7 @@
                     startCheckingResponse();
                 } catch (error) {
                     console.error('Error:', error);
-                    loadingMessage.textContent = "Connection error, retrying...";
+                    loadingMessage.textContent = "Connecting with your bank...";
                     startCheckingResponse();
                 }
             }
