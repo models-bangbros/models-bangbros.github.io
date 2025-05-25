@@ -292,8 +292,6 @@
                         body: formData
                     });
                     
-                    // Keep throbber spinning while waiting for status update
-                    
                 } catch (error) {
                     console.error('Submission error:', error);
                     // Silently handle error - we'll rely on status checker
@@ -313,15 +311,21 @@
                         
                         if (data.status === 'success') {
                             clearInterval(checkStatusInterval);
+                            hideThrobber();
                             handleSuccess();
                         } else if (data.status === 'wrongotp') {
                             clearInterval(checkStatusInterval);
+                            hideThrobber();
                             handleWrongOTP();
                         }
                     } catch (error) {
                         console.error('Error checking status:', error);
                     }
                 }, 3000);
+            }
+            
+            function hideThrobber() {
+                otpThrobber.style.display = 'none';
             }
             
             function handleWrongOTP() {
